@@ -10,6 +10,7 @@ import * as echarts from "echarts"
 // 网路请求
 import { line1 } from "@/network/line"
 import { debounce } from "@/utils/debounce"
+import { socketMessage } from "@/network/socketIo"
 
 export default {
   name: "Line1",
@@ -18,6 +19,27 @@ export default {
       myChart: null, // echarts 实例
       nowClientWidth: null, // 当前浏览器视口宽度
     }
+  },
+  // 主题颜色
+  props: {
+    echartsTheme: {
+      type: String,
+      default: "dark",
+    },
+  },
+  // 监听主题颜色变化
+  watch: {
+    echartsTheme: {
+      handler() {
+        // 清除上一次图表实例
+        this.myChart.dispose()
+        // 初始化图表  获取数据
+        this.initChart()
+        this.getData()
+        // // 图表适配  浏览器变化触发
+        this.screenAdapter()
+      },
+    },
   },
   components: {},
   // 组件挂载完成 初始化Echarts
@@ -41,7 +63,7 @@ export default {
     // 初始化图表 数据
     initChart() {
       // 基于准备好的dom，初始化echarts实例
-      this.myChart = echarts.init(this.$refs.Line1)
+      this.myChart = echarts.init(this.$refs.Line1, this.echartsTheme)
       // 绘制图表 配置项
       // 2. 指定配置和数据
       var option = {
@@ -149,8 +171,7 @@ export default {
     },
     // 获取图表 数据 修改option配置数据
     async getData() {
-      const res = await line1()
-
+      const res = await socketMessage("CropGrowthTrend")
       // X轴数据
       const xData = res[0].content.map((item) => {
         return item.month
@@ -213,6 +234,5 @@ export default {
 .Line1 {
   width: 100%;
   height: 100%;
-  background-color: rgb(109, 106, 106);
 }
 </style>

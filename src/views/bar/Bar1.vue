@@ -10,7 +10,8 @@ import * as echarts from "echarts"
 // 网路请求
 import { bar1 } from "@/network/bar"
 import { debounce } from "@/utils/debounce"
-
+// soket io
+import { socketMessage } from "@/network/socketIo"
 export default {
   name: "Bar1",
   data() {
@@ -18,6 +19,27 @@ export default {
       myChart: null, // echarts 实例
       nowClientWidth: null, // 当前浏览器视口宽度
     }
+  },
+  // 主题颜色
+  props: {
+    echartsTheme: {
+      type: String,
+      default: "dark",
+    },
+  },
+  // 监听主题颜色变化
+  watch: {
+    echartsTheme: {
+      handler() {
+        // 清除上一次图表实例
+        this.myChart.dispose()
+        // 初始化图表  获取数据
+        this.initChart()
+        this.getData()
+        // // 图表适配  浏览器变化触发
+        this.screenAdapter()
+      },
+    },
   },
   components: {},
   // 组件挂载完成 初始化Echarts
@@ -37,13 +59,12 @@ export default {
     // nowSize 屏幕大小发生改变 适配 文字大小
     nowSize(sizi, initWidth = 1920) {
       // 字体大小 *  (当前屏幕宽度 / 设计稿宽度)
-      console.log(sizi * (this.nowClientWidth / initWidth))
       return sizi * (this.nowClientWidth / initWidth)
     },
     // 初始化图表 数据
     initChart() {
       // 基于准备好的dom，初始化echarts实例
-      this.myChart = echarts.init(this.$refs.Bar1)
+      this.myChart = echarts.init(this.$refs.Bar1, this.echartsTheme)
       // 绘制图表 配置项
       let option = {
         title: {
@@ -51,7 +72,6 @@ export default {
           top: "3%",
           left: "5%",
           textStyle: {
-            color: "#fff",
             fontSize: 30,
           },
         },
@@ -135,7 +155,8 @@ export default {
     },
     // 获取图表 数据 修改option配置数据
     async getData() {
-      const res = await bar1()
+      // const res = await bar1()
+      const res = await socketMessage("plantingAreaTop")
       // 根据种植面积大小进行排序
       res.sort((a, b) => {
         // area 是面积
@@ -196,6 +217,5 @@ export default {
 .Bar1 {
   width: 100%;
   height: 100%;
-  background-color: rgb(109, 106, 106);
 }
 </style>

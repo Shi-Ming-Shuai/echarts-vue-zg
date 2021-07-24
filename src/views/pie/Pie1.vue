@@ -10,6 +10,7 @@ import * as echarts from "echarts"
 // 网路请求
 import { pie1 } from "@/network/pie"
 import { debounce } from "@/utils/debounce"
+import { socketMessage } from "@/network/socketIo"
 
 export default {
   name: "Pie1",
@@ -18,6 +19,27 @@ export default {
       myChart: null, // echarts 实例
       nowClientWidth: null, // 当前浏览器视口宽度
     }
+  },
+  // 主题颜色
+  props: {
+    echartsTheme: {
+      type: String,
+      default: "dark",
+    },
+  },
+  // 监听主题颜色变化
+  watch: {
+    echartsTheme: {
+      handler() {
+        // 清除上一次图表实例
+        this.myChart.dispose()
+        // 初始化图表  获取数据
+        this.initChart()
+        this.getData()
+        // // 图表适配  浏览器变化触发
+        this.screenAdapter()
+      },
+    },
   },
   components: {},
   // 组件挂载完成 初始化Echarts
@@ -41,7 +63,7 @@ export default {
     // 初始化图表 数据
     initChart() {
       // 基于准备好的dom，初始化echarts实例
-      this.myChart = echarts.init(this.$refs.Pie1)
+      this.myChart = echarts.init(this.$refs.Pie1, this.echartsTheme)
       // 绘制图表 配置项
       let option = {
         title: {
@@ -93,9 +115,7 @@ export default {
     },
     // 获取图表 数据 修改option配置数据
     async getData() {
-      const res = await pie1()
-      console.log(res)
-
+      const res = await socketMessage("cropAreasProportion")
       // series数据 收入
       // 圆心位置  这个决定将这个饼形图放在哪里
       const centerArr = [
@@ -119,7 +139,6 @@ export default {
           ],
         }
       })
-      console.log(seriesData)
       // 重新设置 图标数据
       this.setChart(seriesData)
     },
@@ -161,6 +180,5 @@ export default {
 .Pie1 {
   width: 100%;
   height: 100%;
-  background-color: rgb(109, 106, 106);
 }
 </style>

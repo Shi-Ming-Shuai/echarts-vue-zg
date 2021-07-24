@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" :style="{ background: bgColor }">
     <!-- <Bar1 /> -->
     <!-- <Bar2 /> -->
     <!-- <Pie1 /> -->
@@ -9,20 +9,25 @@
     <el-row>
       <el-col class="header" :span="24">
         <header>Echarts-各地区种植面积统计</header>
+        <el-button
+          @click="changeTheme"
+          :style="{ position: 'fixed', top: '30px', right: '20px' }"
+          >切换主题</el-button
+        >
       </el-col>
     </el-row>
     <el-row>
       <el-col :xs="24" :lg="12" :xl="24">
-        <Bar1 />
+        <Bar1 :echartsTheme="echartsTheme" />
       </el-col>
       <el-col :xs="24" :lg="12" :xl="8">
-        <Bar2 />
+        <Bar2 :echartsTheme="echartsTheme" />
       </el-col>
       <el-col :xs="24" :lg="16" :xl="14">
-        <Pie1 />
+        <Pie1 :echartsTheme="echartsTheme" />
       </el-col>
       <el-col :xs="24" :lg="8" :xl="24">
-        <Line1 />
+        <Line1 :echartsTheme="echartsTheme" />
       </el-col>
     </el-row>
   </div>
@@ -41,12 +46,30 @@ import Line1 from "@/views/line/Line1"
 
 export default {
   name: "App",
+  data() {
+    return {
+      bgColor: "#100c2a",
+      echartsTheme: "dark",
+    }
+  },
   components: {
     Bar1,
     Bar2,
     Pie1,
     Map,
     Line1,
+  },
+  methods: {
+    // 切换主题
+    changeTheme() {
+      if (this.echartsTheme === "dark") {
+        this.bgColor = "#9edf7f"
+        this.echartsTheme = "theme_qing"
+        return
+      }
+      this.bgColor = "#100c2a"
+      this.echartsTheme = "dark"
+    },
   },
 }
 </script>
@@ -62,6 +85,9 @@ html,
 .el-col {
   border: 1px solid #fff;
   height: 300px;
+}
+.el-button {
+  z-index: 10000000;
 }
 .header {
   height: 100px;
